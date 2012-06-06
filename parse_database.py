@@ -7,12 +7,15 @@ by different, specialized classes
 
 import sys
 
+#todo document variables
+
 class ParseDatabase(object):
 
     def __init__(self, fname):
         self.filename = fname
         self.filelines = []
         self.f = open(self.filename, "r")
+        self.instances = []
 
     def open_data(self):
         try:
