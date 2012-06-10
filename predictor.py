@@ -35,7 +35,7 @@ class Predictor(object):
         return self.users, self.items
 
     #todo trusting on that, check it out better
-    def __compute_means(self, info):
+    def compute_means(self, info):
         avgs = {}
         for i in info.keys():
             avgs[i] = 0.0
@@ -53,14 +53,14 @@ class Predictor(object):
         { item : {user : rating} } or in the
         for { user : {item : rating} }
         '''
-        avgs = self.__compute_means(info)
+        avgs = self.compute_means(info)
         for i in info.keys():
             for j in info[i].keys():
                 info[i][j] -= avgs[i]
-        return info
+        return info, means
 
         
 if __name__=="__main__":
     a = Predictor(sys.argv[1], sys.argv[2])
     users, items = a.store_data_relations() #~100MB
-    a.normalize_ratings(users)
+    ratings, means = a.normalize_ratings(users)
