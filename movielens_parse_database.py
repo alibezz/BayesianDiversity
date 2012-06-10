@@ -42,10 +42,14 @@ if __name__=="__main__":
 #filmes por usuario com as respectivas notas
 
 #essa classe vai fazer o seguinte: parseia as linhas 
-#e as deixa disponiveis.
+#e as deixa disponiveis. OK
 
 #uma classe pra cross validation vai pegar esses 
 #dados e gerar os folds de treino e teste, guardar
-#em arquivos e, possivelmente, comprimir.
+#em arquivos e, possivelmente, comprimir. OK (menos compressao, ta como todo)
+
+#uma classe generica vai ser pai de diferentes preditores e vai cuidar de
+#associar os dados e normalizar as notas
+
 
 
