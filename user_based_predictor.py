@@ -87,11 +87,11 @@ if __name__=="__main__":
     '''
     a = Predictor(sys.argv[1], sys.argv[2])
     users, items = a.store_data_relations() #~100MB
-    #ratings, means = a.normalize_ratings(users)
+    ratings, means = a.normalize_ratings(users)
     
-    recommender = UserBasedPredictor(users) #first, without normalizing
+    #recommender = UserBasedPredictor(users) #first, without normalizing
 
-    #recommender = UserBasedPredictor(ratings, means)
+    recommender = UserBasedPredictor(ratings, means)
 
     print recommender.getRecommendations('5988')
 
