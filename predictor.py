@@ -57,7 +57,7 @@ class Predictor(object):
         for i in info.keys():
             for j in info[i].keys():
                 info[i][j] -= avgs[i]
-        return info, means
+        return info, avgs
 
         
 if __name__=="__main__":

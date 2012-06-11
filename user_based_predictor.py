@@ -4,7 +4,7 @@ from Programming Collective Intelligence (O'Reilly)
 '''
 
 from predictor import Predictor
-from math import sqrt
+from math import sqrt, fabs
 import sys
 
 class UserBasedPredictor(object):
@@ -41,7 +41,7 @@ class UserBasedPredictor(object):
 
         # Calculate Pearson score
         num = pSum - (sum1 * sum2 /n)
-        den = sqrt((sum1Sq - pow(sum1,2)/n)*(sum2Sq-pow(sum2,2)/n))
+        den = sqrt(fabs((sum1Sq - pow(sum1,2)/n))*fabs((sum2Sq-pow(sum2,2)/n)))
         if den == 0: return 0
 
         return num/den
@@ -69,7 +69,10 @@ class UserBasedPredictor(object):
                     simSums[item] += sim
 
         # Create the normalized list
-        rankings = [(total/simSums[item],item) for item, total in totals.items()]
+        if self.means:
+            rankings = [(total/simSums[item] + self.means[person],item) for item, total in totals.items()] #todo pass 100 at most or so
+        else:
+            rankings = [(total/simSums[item],item) for item, total in totals.items()] #todo pass 100 at most or so
         
         # Return the sorted list
         rankings.sort()
@@ -84,8 +87,11 @@ if __name__=="__main__":
     '''
     a = Predictor(sys.argv[1], sys.argv[2])
     users, items = a.store_data_relations() #~100MB
+    #ratings, means = a.normalize_ratings(users)
     
     recommender = UserBasedPredictor(users) #first, without normalizing
+
+    #recommender = UserBasedPredictor(ratings, means)
 
     print recommender.getRecommendations('5988')
 
