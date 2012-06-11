@@ -97,3 +97,4 @@ if __name__=="__main__":
 
 
 #TODO use euclidian distance
+#TODO chooses what gives the best rmse
