@@ -95,3 +95,5 @@ if __name__=="__main__":
 
     print recommender.getRecommendations('5988')
 
+
+#TODO use euclidian distance
