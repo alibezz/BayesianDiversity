@@ -1,0 +1,90 @@
+'''
+Baseline neighborhood-based predictor from 
+Cremonesi, Koren, and Turrin (RecSys 2010)
+'''
+
+from predictor import Predictor
+from ranker import Ranker
+import sys
+import numpy as np
+import math
+
+class NNCossNgbrPredictor(object):
+
+    def __init__(self, i, u):
+        self.item_ratings = i
+        self.user_ratings = u    
+        self.__extractSimilarItems(threshold=20)
+
+
+    def __similarity(self, item1, item2, shrinking_factor=0.0):
+
+        ratings1 = []
+        ratings2 = []
+        
+        for user in self.item_ratings[item1]:
+            if user in self.item_ratings[item2]:
+                ratings1.append(self.item_ratings[item1][user])
+                ratings2.append(self.item_ratings[item2][user])
+
+        if len(ratings1) == 0: return 0.0
+
+        cosine = np.inner(ratings1,ratings2)/(math.sqrt(np.inner(ratings1, ratings1)) * math.sqrt(np.inner(ratings2, ratings2)))
+
+        return  (len(ratings1)/(shrinking_factor + len(ratings1))) * cosine       
+
+
+    def __topMatches(self, item, threshold):
+        scores=[(self.__similarity(item,other, shrinking_factor=100), other)
+                for other in self.item_ratings.keys() if other != item]
+        scores.sort(); scores.reverse()
+        return scores[:threshold]
+
+    def __extractSimilarItems(self, threshold=10):
+        
+        self.similar_items = {}
+
+        c = 0
+        for item in self.item_ratings:
+            # Status updates for large datasets
+            c += 1
+            if c % 100 == 0: print "%d / %d" % (c,len(self.item_ratings))
+            self.similar_items[item] = self.__topMatches(item,threshold)
+            if c == 100: break
+    
+    def getRecommendations(self, person, item_threshold=10):
+
+        user_ratings = self.user_ratings[person]
+        scores = {}
+
+        # Loop over items rated by this user
+        for (item, rating) in user_ratings.items():
+            # Loop over items similar to this one
+            try:
+                for (similarity,item2) in self.similar_items[item][:item_threshold]:
+                    if item2 in user_ratings: continue
+                    scores.setdefault(item2,0)
+                    scores[item2] += similarity * rating
+            except:
+                continue
+                
+        rankings = [(score,item) for item,score in scores.items()]
+        rankings.sort(); rankings.reverse()
+        return rankings
+
+
+            
+
+if __name__=="__main__":
+    '''
+    sys.argv[1] => training data
+    sys.argv[2] => data separator
+    '''
+    a = Predictor(sys.argv[1], sys.argv[2])
+    users, items = a.store_data_relations() #~100MB
+    recommender = NNCossNgbrPredictor(items, users) 
+
+    # b = Ranker(10)
+    # for u in users.keys():
+    #     print u, b.topRatings(recommender.getRecommendations(u)[:60])
+    #     #a =  b.maximizeKGreatItems(1, recommender.getRecommendations(u)[:60], items)
