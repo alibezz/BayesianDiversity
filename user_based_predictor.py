@@ -4,6 +4,7 @@ from Programming Collective Intelligence (O'Reilly)
 '''
 
 from predictor import Predictor
+from ranker import Ranker
 from math import sqrt, fabs
 import sys
 
@@ -87,14 +88,23 @@ if __name__=="__main__":
     '''
     a = Predictor(sys.argv[1], sys.argv[2])
     users, items = a.store_data_relations() #~100MB
-    ratings, means = a.normalize_ratings(users)
+    #ratings, means = a.normalize_ratings(users)
     
-    #recommender = UserBasedPredictor(users) #first, without normalizing
+    recommender = UserBasedPredictor(users) #first, without normalizing
 
-    recommender = UserBasedPredictor(ratings, means)
+    #recommender = UserBasedPredictor(ratings, means)
 
-    print recommender.getRecommendations('5988')
+    #todo: checar quais os itens mais recomendados e se eles sao populares ou oq
+    #todo: estudar o nivel de personalizacao desse babado
 
+    b = Ranker(5)
+    statistically_better = 0.0
+    for u in users.keys():
+        #print u, b.topRatings(recommender.getRecommendations(u)[:30])
+        a =  b.maximizeKGreatItems(1, recommender.getRecommendations(u)[:60], items)
+        if a: statistically_better += 1.0
+        print statistically_better
+    print statistically_better/len(users.keys())
 
 #TODO use euclidian distance
 #TODO chooses what gives the best rmse

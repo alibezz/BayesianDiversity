@@ -21,7 +21,7 @@ class NNCossNgbrPredictor(object):
 
         ratings1 = []
         ratings2 = []
-        
+
         for user in self.item_ratings[item1]:
             if user in self.item_ratings[item2]:
                 ratings1.append(self.item_ratings[item1][user])
@@ -30,8 +30,7 @@ class NNCossNgbrPredictor(object):
         if len(ratings1) == 0: return 0.0
 
         cosine = np.inner(ratings1,ratings2)/(math.sqrt(np.inner(ratings1, ratings1)) * math.sqrt(np.inner(ratings2, ratings2)))
-
-        return  (len(ratings1)/(shrinking_factor + len(ratings1))) * cosine       
+        return  ((1.0 * len(ratings1))/(1.0 * shrinking_factor + len(ratings1))) * cosine       
 
 
     def __topMatches(self, item, threshold):
@@ -50,8 +49,8 @@ class NNCossNgbrPredictor(object):
             c += 1
             if c % 100 == 0: print "%d / %d" % (c,len(self.item_ratings))
             self.similar_items[item] = self.__topMatches(item,threshold)
-            if c == 100: break
-    
+            if c == 300: break
+
     def getRecommendations(self, person, item_threshold=10):
 
         user_ratings = self.user_ratings[person]
@@ -70,10 +69,7 @@ class NNCossNgbrPredictor(object):
                 
         rankings = [(score,item) for item,score in scores.items()]
         rankings.sort(); rankings.reverse()
-        return rankings
-
-
-            
+        return rankings   
 
 if __name__=="__main__":
     '''
@@ -84,7 +80,7 @@ if __name__=="__main__":
     users, items = a.store_data_relations() #~100MB
     recommender = NNCossNgbrPredictor(items, users) 
 
-    # b = Ranker(10)
-    # for u in users.keys():
-    #     print u, b.topRatings(recommender.getRecommendations(u)[:60])
-    #     #a =  b.maximizeKGreatItems(1, recommender.getRecommendations(u)[:60], items)
+    b = Ranker(10)
+    for u in users.keys():
+        print u, b.topRatings(recommender.getRecommendations(u))
+        #a =  b.maximizeKGreatItems(1, recommender.getRecommendations(u)[:60], items)
