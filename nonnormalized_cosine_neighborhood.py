@@ -5,6 +5,7 @@ Cremonesi, Koren, and Turrin (RecSys 2010)
 
 from predictor import Predictor
 from ranker import Ranker
+from evaluator import Evaluator
 import sys
 import numpy as np
 import math
@@ -74,13 +75,19 @@ class NNCossNgbrPredictor(object):
 if __name__=="__main__":
     '''
     sys.argv[1] => training data
-    sys.argv[2] => data separator
+    sys.argv[2] => test data
+    sys.argv[3] => data separator
     '''
-    a = Predictor(sys.argv[1], sys.argv[2])
-    users, items = a.store_data_relations() #~100MB
+    pred = Predictor(sys.argv[1], sys.argv[3])
+    users, items = pred.store_data_relations() #~100MB
     recommender = NNCossNgbrPredictor(items, users) 
 
-    b = Ranker(10)
+    ranker = Ranker(10)
+
+    testing = Predictor(sys.argv[1], sys.argv[3])
+    test_users, test_items = testing.store_data_relations()
+    ev = Evaluator(test_users)
+
     for u in users.keys():
-        print u, b.topRatings(recommender.getRecommendations(u))
+        print u, ev.totalOfRatings(ranker.topRatings(recommender.getRecommendations(u)))
         #a =  b.maximizeKGreatItems(1, recommender.getRecommendations(u)[:60], items)
