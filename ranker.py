@@ -64,6 +64,25 @@ class Ranker(object):
 
         return normalized
 
+    def chooseNextItem(self, candidates, selected, items):
+        #assume independency between selected items for simplicity => avoid DATA FRAGMENTATION
+        #TODO see whether this is useful and whether we can change it
+        #Prob(like candidate) * Prob(did not like selected1 | liked candidate) * .... * Prob(did not like selectedX | liked candidate)
+
+        maxprob = 0.0; chosen = -1; priori_score = 0.0
+
+        for (value, candidate) in candidates:
+            prob = math.log(value + 0.01)
+            for (value2, item) in selected:
+                prob += math.log(self.__probabilityOfOnlyLikingCandidate(self.__getCommonUsers(items[candidate], items[item])) + 0.01)
+                prob = math.exp(prob)
+            if prob > maxprob: 
+                maxprob = prob
+                chosen = candidate
+                priori_score = value
+
+        return chosen, maxprob, priori_score
+
 
     def maximizeKGreatItems(self, K, predictions, items):
 
@@ -72,19 +91,10 @@ class Ranker(object):
         candidates = normalized[K:]
 
         while(len(selected) < self.N):
-            maxprob = 0.0; chosen = -1
-            for (value, candidate) in candidates:
-
-                #assume independency between selected items for simplicity => avoid DATA FRAGMENTATION
-                #TODO see whether this is useful and whether we can change it
-                prob = 0.0
-                for (value2, item) in selected:
-                    prob += math.log(self.__probabilityOfOnlyLikingCandidate(self.__getCommonUsers(items[candidate], items[item])) + 0.01)
-                prob = math.exp(prob)
-
-                if prob > maxprob: 
-                    maxprob = prob
-                    chosen = candidate
+            chosen, posteriori_score, priori_score = self.chooseNextItem(candidates, selected, items)
             if chosen == -1: break #did not choose any item at all! selected's length got stable
-            selected.append((maxprob, chosen))
-        return selected[1:]
+
+            selected.append((posteriori_score, chosen))
+            candidates.remove((priori_score, chosen))
+
+        return selected
