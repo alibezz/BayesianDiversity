@@ -15,10 +15,10 @@ class NNCossNgbrPredictor(object):
     def __init__(self, i, u):
         self.item_ratings = i
         self.user_ratings = u    
-        self.__extractSimilarItems(threshold=20)
+        self.__extractSimilarItems(threshold=30)
 
 
-    def __similarity(self, item1, item2, shrinking_factor=0.0):
+    def __similarity(self, item1, item2, shrinking_factor=100.0):
 
         ratings1 = []
         ratings2 = []
@@ -40,7 +40,7 @@ class NNCossNgbrPredictor(object):
         scores.sort(); scores.reverse()
         return scores[:threshold]
 
-    def __extractSimilarItems(self, threshold=10):
+    def __extractSimilarItems(self, threshold=60):
         
         self.similar_items = {}
 
@@ -82,12 +82,20 @@ if __name__=="__main__":
     users, items = pred.store_data_relations() #~100MB
     recommender = NNCossNgbrPredictor(items, users) 
 
-    ranker = Ranker(10)
+    ranker = Ranker(20)
 
-    testing = Predictor(sys.argv[1], sys.argv[3])
+    testing = Predictor(sys.argv[2], sys.argv[3])
     test_users, test_items = testing.store_data_relations()
     ev = Evaluator(test_users)
 
+    recommended_ratings = []
+    count = 0
+
     for u in users.keys():
-        print u, ev.totalOfRatings(ranker.topRatings(recommender.getRecommendations(u)))
-        #a =  b.maximizeKGreatItems(1, recommender.getRecommendations(u)[:60], items)
+        #recommended_ratings += ev.totalOfRatings(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
+        recommended_ratings += ev.totalOfRatings(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
+        count += 1
+        if count % 100 == 0: print "%d / %d" % (count,len(users))
+
+    print len(recommended_ratings)
+    print sum(recommended_ratings)/len(recommended_ratings)

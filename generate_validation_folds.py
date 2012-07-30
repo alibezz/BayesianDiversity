@@ -65,7 +65,11 @@ class GenerateValidationFolds(object):
             f.close()
 
 if __name__=="__main__":
-
+    '''
+    sys.argv[1] => all data from the dataset
+    sys.argv[2] => separator
+    sys.argv[3] => parameter K for K folds
+    '''
 #todo refactor this, so this main won't be here anymore
     m = MovielensParseDatabase(sys.argv[1])
     m.read_lines()
