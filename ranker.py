@@ -39,15 +39,18 @@ class Ranker(object):
         liked_only_candidate = 0.0
         for user in common_ratings.keys():
             rating1, rating2 = common_ratings[user]
-            if rating1 >= 4 and rating2 < 4:
+            if rating1 >= 4 and rating2 >= 4: #TODO probability of liking BOTH candidates, not only one!
                 liked_only_candidate += 1.0
 
         #probability is shrunk by the ammount of considered users
         #TODO sampling is something to examine
         #return liked_only_candidate/len(common_ratings)
 
-        shrinking_factor = 100
-        return ((1.0 * len(common_ratings))/(1.0 * shrinking_factor + len(common_ratings))) * liked_only_candidate/len(common_ratings)
+        shrinking_factor = 1
+        prob = ((1.0 * len(common_ratings))/(1.0 * shrinking_factor + len(common_ratings))) * liked_only_candidate/len(common_ratings)
+
+        #print liked_only_candidate/len(common_ratings)
+        return liked_only_candidate/len(common_ratings)
 
 
     def __normalizePredictions(self, predictions):
@@ -64,7 +67,7 @@ class Ranker(object):
 
         return normalized
 
-    def chooseNextItem(self, candidates, selected, items):
+    def __chooseNextItem(self, candidates, selected, items):
         #assume independency between selected items for simplicity => avoid DATA FRAGMENTATION
         #TODO see whether this is useful and whether we can change it
         #Prob(like candidate) * Prob(did not like selected1 | liked candidate) * .... * Prob(did not like selectedX | liked candidate)
@@ -75,7 +78,7 @@ class Ranker(object):
             prob = math.log(value + 0.01)
             for (value2, item) in selected:
                 prob += math.log(self.__probabilityOfOnlyLikingCandidate(self.__getCommonUsers(items[candidate], items[item])) + 0.01)
-                prob = math.exp(prob)
+            prob = math.exp(prob)
             if prob > maxprob: 
                 maxprob = prob
                 chosen = candidate
@@ -91,10 +94,11 @@ class Ranker(object):
         candidates = normalized[K:]
 
         while(len(selected) < self.N):
-            chosen, posteriori_score, priori_score = self.chooseNextItem(candidates, selected, items)
+            chosen, posteriori_score, priori_score = self.__chooseNextItem(candidates, selected, items)
             if chosen == -1: break #did not choose any item at all! selected's length got stable
 
             selected.append((posteriori_score, chosen))
             candidates.remove((priori_score, chosen))
 
+        print [ID for (score, ID) in selected]
         return selected

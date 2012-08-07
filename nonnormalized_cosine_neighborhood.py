@@ -89,13 +89,18 @@ if __name__=="__main__":
     ev = Evaluator(test_users)
 
     recommended_ratings = []
+    hits = 0
     count = 0
 
     for u in users.keys():
-        #recommended_ratings += ev.totalOfRatings(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
-        recommended_ratings += ev.totalOfRatings(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
+        recommended_ratings += ev.totalOfRatings(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
+        #recommended_ratings += ev.totalOfRatings(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
+
+        hits += ev.hadAHit(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
+        #hits += ev.hadAHit(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
         count += 1
         if count % 100 == 0: print "%d / %d" % (count,len(users))
 
+    print hits
     print len(recommended_ratings)
     print sum(recommended_ratings)/len(recommended_ratings)
