@@ -50,7 +50,7 @@ class NNCossNgbrPredictor(object):
             c += 1
             if c % 100 == 0: print "%d / %d" % (c,len(self.item_ratings))
             self.similar_items[item] = self.__topMatches(item,threshold)
-            if c == 300: break
+            #if c == 300: break
 
     def getRecommendations(self, person, item_threshold=10):
 
@@ -81,26 +81,32 @@ if __name__=="__main__":
     pred = Predictor(sys.argv[1], sys.argv[3])
     users, items = pred.store_data_relations() #~100MB
     recommender = NNCossNgbrPredictor(items, users) 
+    N = 20
 
-    ranker = Ranker(20)
-
+    ranker = Ranker(N)
     testing = Predictor(sys.argv[2], sys.argv[3])
     test_users, test_items = testing.store_data_relations()
-    ev = Evaluator(test_users)
+    ev = Evaluator(test_users, N)
 
-    recommended_ratings = []
-    hits = 0
+    #recommended_ratings = []
+    #hits = 0
     count = 0
-
+    div_metric = []
     for u in users.keys():
-        recommended_ratings += ev.totalOfRatings(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
+        
+        #recommendations = ranker.topRatings(recommender.getRecommendations(u, item_threshold=40))
+        recommendations = ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items)
+        div_metric.append(ev.diversityEILD(recommendations, items))
+
+        #recommended_ratings += ev.totalOfRatings(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
         #recommended_ratings += ev.totalOfRatings(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
 
-        hits += ev.hadAHit(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
+        #hits += ev.hadAHit(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
         #hits += ev.hadAHit(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
         count += 1
         if count % 100 == 0: print "%d / %d" % (count,len(users))
 
-    print hits
-    print len(recommended_ratings)
-    print sum(recommended_ratings)/len(recommended_ratings)
+    #print hits
+    #print len(recommended_ratings)
+    #print sum(recommended_ratings)/len(recommended_ratings)
+    print sum(div_metric)/len(div_metric)

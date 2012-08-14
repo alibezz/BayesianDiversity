@@ -39,7 +39,7 @@ class Ranker(object):
         liked_only_candidate = 0.0
         for user in common_ratings.keys():
             rating1, rating2 = common_ratings[user]
-            if rating1 >= 4 and rating2 >= 4: #TODO probability of liking BOTH candidates, not only one!
+            if rating1 >= 4 and rating2 < 4: #TODO probability of liking BOTH candidates, not only one!
                 liked_only_candidate += 1.0
 
         #probability is shrunk by the ammount of considered users
@@ -100,5 +100,5 @@ class Ranker(object):
             selected.append((posteriori_score, chosen))
             candidates.remove((priori_score, chosen))
 
-        print [ID for (score, ID) in selected]
+        #print [ID for (score, ID) in selected]
         return selected
