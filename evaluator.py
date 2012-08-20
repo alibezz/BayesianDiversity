@@ -30,7 +30,21 @@ class Evaluator(object):
                 recommended_ratings.append(self.users[user][i])
         return recommended_ratings
 
+    def hits(self, user, predictions):
+        #TODO It does not make much sense to use it if items in test are not relevant...
+        try:
+            test_items = self.users[user].keys()
+        except:
+            test_items = []
 
+        predicted_items = [i[1] for i in predictions]
+
+        hits = 0.0
+        for i in predicted_items:
+            if i in test_items:
+                hits += 1.0
+        return hits 
+    
     def hadAHit(self, user, predictions):
         try:
             test_items = self.users[user].keys()
@@ -46,7 +60,6 @@ class Evaluator(object):
 
         return 0
 
-
     def __itemSimilarity(self, item1, item2, items):
 
         users1 = items[item1]; users2 = items[item2]
@@ -54,7 +67,7 @@ class Evaluator(object):
         users_that_liked_item2 = [i[0] for i in users2.items() if i[1] >= 4.0]        
         intersection = len(set(users_that_liked_item1) & set(users_that_liked_item2))
 
-        return float(intersection)/(math.sqrt(len(users_that_liked_item1)) * math.sqrt(len(users_that_liked_item1)))
+        return float(intersection)/(math.sqrt(len(users_that_liked_item1)) * math.sqrt(len(users_that_liked_item2)))
 
 
     def __rankingDiscount(self, position):
@@ -111,3 +124,17 @@ class Evaluator(object):
             metric += d * disc_k * rel_disc * Ck
             
         return metric
+
+    def simpleDiversity(self, recommendations, items):
+        '''
+        Distance-based metric that does not consider nor ranking issues nor relevance
+        '''
+
+        import itertools 
+        recommended_items = [i[1] for i in recommendations]       
+        combs = list(itertools.combinations(recommended_items, 2))
+        metric = 0.0
+        for c in combs:
+            metric += self.__itemSimilarity(c[0], c[1], items)
+        return metric
+            

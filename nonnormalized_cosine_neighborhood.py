@@ -91,12 +91,17 @@ if __name__=="__main__":
     #recommended_ratings = []
     #hits = 0
     count = 0
-    div_metric = []
+    div_metric1 = []
+    div_metric2 = []
+    hits = 0.0
     for u in users.keys():
         
         #recommendations = ranker.topRatings(recommender.getRecommendations(u, item_threshold=40))
         recommendations = ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items)
-        div_metric.append(ev.diversityEILD(recommendations, items))
+        hits += ev.hits(u, recommendations)
+        div_metric1.append(ev.simpleDiversity(recommendations, items))
+
+        div_metric2.append(ev.diversityEILD(recommendations, items))
 
         #recommended_ratings += ev.totalOfRatings(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
         #recommended_ratings += ev.totalOfRatings(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
@@ -109,4 +114,7 @@ if __name__=="__main__":
     #print hits
     #print len(recommended_ratings)
     #print sum(recommended_ratings)/len(recommended_ratings)
-    print sum(div_metric)/len(div_metric)
+    print 'div simple', sum(div_metric1)/len(div_metric1)
+    print 'div vargas', sum(div_metric2)/len(div_metric2)
+    test_size = 20000
+    print 'rec', hits/test_size, 'prec', hits/(test_size * N)
