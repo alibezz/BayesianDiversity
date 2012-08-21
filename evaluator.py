@@ -45,20 +45,16 @@ class Evaluator(object):
                 hits += 1.0
         return hits 
     
-    def hadAHit(self, user, predictions):
-        try:
-            test_items = self.users[user].keys()
-        except:
-            test_items = []
-
+    def hadAHit(self, predictions, item):
+        '''
+        if item is one of the predictions,
+        we had a hit
+        '''
         predicted_items = [i[1] for i in predictions]
-
-        recommended_ratings = []
-        for i in predicted_items:
-            if i in test_items:
-                return 1
-
-        return 0
+        if item in predicted_items:
+            return 1
+        else:
+            return 0
 
     def __itemSimilarity(self, item1, item2, items):
 
@@ -66,7 +62,9 @@ class Evaluator(object):
         users_that_liked_item1 = [i[0] for i in users1.items() if i[1] >= 4.0]
         users_that_liked_item2 = [i[0] for i in users2.items() if i[1] >= 4.0]        
         intersection = len(set(users_that_liked_item1) & set(users_that_liked_item2))
-
+        
+        if users_that_liked_item1 == [] or users_that_liked_item2 == []:
+            return 0.0
         return float(intersection)/(math.sqrt(len(users_that_liked_item1)) * math.sqrt(len(users_that_liked_item2)))
 
 
