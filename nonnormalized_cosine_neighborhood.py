@@ -126,6 +126,7 @@ if __name__=="__main__":
     hits = 0
     div_metric1 = []
     div_metric2 = []
+    recommended_ratings = []
     for u in test_users.keys():
         for i in test_users[u].keys():
 
@@ -138,12 +139,13 @@ if __name__=="__main__":
             items_for_cremonesi_validation = recommender.choose_some_items(item_ids, user_items, i, 100)            
             ratings = recommender.get_cremonesi_ratings(u, items_for_cremonesi_validation)
 
-            #recommendations = ranker.topRatings(ratings)
-            recommendations = ranker.maximizeKGreatItems(1, ratings, training_items)
+            recommendations = ranker.topRatings(ratings)
+            #recommendations = ranker.maximizeKGreatItems(1, ratings, training_items)
+            recommended_ratings += ev.totalOfRatings(u, recommendations)
             hits += ev.hadAHit(recommendations, i)
             div_metric1.append(ev.simpleDiversity(recommendations, training_items))
             div_metric2.append(ev.diversityEILD(recommendations, training_items))
-
+             
     test_size = 301.0
     print 'rec', hits/test_size, 'prec', hits/(test_size * N)
     print 'sim simple', sum(div_metric1)/len(div_metric1)

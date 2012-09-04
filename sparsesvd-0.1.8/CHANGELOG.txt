@@ -1,0 +1,32 @@
+Changes
+=======
+
+0.1.8
+
+* added manifest file, for README.rst
+
+0.1.7
+
+* upgraded ez_setup.py (old one still referenced cheeseshop)
+
+0.1.6
+
+* added a license: Free BSD
+* moved hosting to github
+
+0.1.5
+
+* fixed a bug deep inside SVDLIBC, where a global error flag was not being reset
+  before: zero input matrix=>global error flag set + memory leak + all subsequent calls to sparsesvd() terminate early
+  now: the error flag is reset before each call; zero input matrix correctly returns zero factors
+
+  thanks to Peter Prettenhofer for reporting the bug
+
+0.1.4
+
+* minor edits in docstrings and setup.py
+
+0.1.3
+
+* removed (commented out) all code paths that performed any I/O
+* removed unneeded *.h headers, improving portability (mainly for Windows compilation)
