@@ -71,7 +71,7 @@ class NNCossNgbrPredictor(object):
         rankings.sort(); rankings.reverse()
         return rankings   
 
-    def get_cremonesi_ratings(self, user, selected_items):
+    def get_ratings(self, user, selected_items):
         '''
         applies NNCosNgbr, but instead of searching items in similar_items 
         within a threshold, searches for all selected_items and generates 
@@ -94,18 +94,6 @@ class NNCossNgbrPredictor(object):
         rankings.sort(); rankings.reverse()
         return rankings   
 
-    def choose_some_items(self, item_ids, user_items, target_item, K):
-        '''
-        Selects K items in the dataset (item_ids) randomly, 
-        excluding those that were rated by a certain user (user_items)
-        and appending the target_item
-        '''
-        items = list(set(item_ids) - set(user_items))
-        items.append(target_item)
-
-        from random import sample
-        return sample(items, K)
-
 if __name__=="__main__":
     '''
     sys.argv[1] => training data
@@ -122,6 +110,8 @@ if __name__=="__main__":
     test_users, test_items = testing.store_data_relations()
     ev = Evaluator(test_users, N)
 
+
+    #TODO clean this interface!
     item_ids = list(set(training_items.keys() + test_items.keys())) #all unique items in the dataset
     hits = 0
     div_metric1 = []
@@ -136,8 +126,8 @@ if __name__=="__main__":
             if u in test_users:
                 user_items += test_users[u].keys()
 
-            items_for_cremonesi_validation = recommender.choose_some_items(item_ids, user_items, i, 100)            
-            ratings = recommender.get_cremonesi_ratings(u, items_for_cremonesi_validation)
+            items_for_cremonesi_validation = testing.choose_some_items(item_ids, user_items, i, 100)            
+            ratings = recommender.get_ratings(u, items_for_cremonesi_validation)
 
             recommendations = ranker.topRatings(ratings)
             #recommendations = ranker.maximizeKGreatItems(1, ratings, training_items)
@@ -150,34 +140,3 @@ if __name__=="__main__":
     print 'rec', hits/test_size, 'prec', hits/(test_size * N)
     print 'sim simple', sum(div_metric1)/len(div_metric1)
     print 'div vargas', sum(div_metric2)/len(div_metric2)
-
-    #recommended_ratings = []
-    # #hits = 0
-    # count = 0
-    # div_metric1 = []
-    # div_metric2 = []
-    # hits = 0.0
-    # for u in users.keys():
-    #     items_for_cremonesi_validation = self.choose_some_items(users[u].keys(), 0.25)
-    #     #recommendations = ranker.topRatings(recommender.getRecommendations(u, item_threshold=40))
-    #     recommendations = ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items)
-    #     hits += ev.hits(u, recommendations)
-    #     div_metric1.append(ev.simpleDiversity(recommendations, items))
-
-    #     div_metric2.append(ev.diversityEILD(recommendations, items))
-
-    #     #recommended_ratings += ev.totalOfRatings(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
-    #     #recommended_ratings += ev.totalOfRatings(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
-
-    #     #hits += ev.hadAHit(u, ranker.topRatings(recommender.getRecommendations(u, item_threshold=40)))
-    #     #hits += ev.hadAHit(u, ranker.maximizeKGreatItems(1, recommender.getRecommendations(u, item_threshold=40), items))
-    #     count += 1
-    #     if count % 100 == 0: print "%d / %d" % (count,len(users))
-
-    # #print hits
-    # #print len(recommended_ratings)
-    # #print sum(recommended_ratings)/len(recommended_ratings)
-    # print 'div simple', sum(div_metric1)/len(div_metric1)
-    # print 'div vargas', sum(div_metric2)/len(div_metric2)
-    # test_size = 301
-    # print 'rec', hits/test_size, 'prec', hits/(test_size * N)
