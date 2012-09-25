@@ -90,11 +90,11 @@ if __name__=="__main__":
     '''
     training = Predictor(sys.argv[1], sys.argv[3])
     training_users, training_items = training.store_data_relations() #~100MB
-    num_factors = 10
+    num_factors = 50
     recommender = PureSVDPredictor(training_items, training_users, num_factors)
 
     #TODO remove redundancy wrt nncosngbr
-    N = 20
+    N = 10
     ranker = Ranker(N)
     testing = Predictor(sys.argv[2], sys.argv[3])
     test_users, test_items = testing.store_data_relations()
@@ -106,7 +106,7 @@ if __name__=="__main__":
     hits = 0
     div_metric1 = []
     div_metric2 = []
-    recommended_ratings = []
+    #recommended_ratings = []
     for u in test_users.keys():
         for i in test_users[u].keys():
 
@@ -117,17 +117,17 @@ if __name__=="__main__":
             if u in test_users:
                 user_items += test_users[u].keys()
 
-            items_for_cremonesi_validation = testing.choose_some_items(item_ids, user_items, i, 100)
+            items_for_cremonesi_validation = testing.choose_some_items(item_ids, user_items, i, 1000)
             ratings = recommender.get_ratings(u, items_for_cremonesi_validation)
 
-            recommendations = ranker.topRatings(ratings)
-            #recommendations = ranker.maximizeKGreatItems(1, ratings, training_items)
-            recommended_ratings += ev.totalOfRatings(u, recommendations)
+            #recommendations = ranker.topRatings(ratings)
+            recommendations = ranker.maximizeKGreatItems(1, ratings, training_items)
+            #recommended_ratings += ev.totalOfRatings(u, recommendations)
             hits += ev.hadAHit(recommendations, i)
             div_metric1.append(ev.simpleDiversity(recommendations, training_items))
             div_metric2.append(ev.diversityEILD(recommendations, training_items))
-             
-    test_size = 301.0
+    print hits
+    test_size = 3191.0
     print 'rec', hits/test_size, 'prec', hits/(test_size * N)
     print 'sim simple', sum(div_metric1)/len(div_metric1)
     print 'div vargas', sum(div_metric2)/len(div_metric2)

@@ -40,7 +40,7 @@ class GenerateValidationFolds(object):
         
     def __format_example(self, example):
         line = str(example)
-        line = re.sub('[\[\]\']', '', line)
+        line = re.sub('[\[\]\' ]', '', line)
         return line + "\n"
 
     def __write_folds(self, fold_ids, f, folds):

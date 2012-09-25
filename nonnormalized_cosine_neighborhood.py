@@ -104,7 +104,7 @@ if __name__=="__main__":
     training_users, training_items = training.store_data_relations() #~100MB
     recommender = NNCossNgbrPredictor(training_items, training_users) 
 
-    N = 20
+    N = 10
     ranker = Ranker(N)
     testing = Predictor(sys.argv[2], sys.argv[3])
     test_users, test_items = testing.store_data_relations()
@@ -126,7 +126,7 @@ if __name__=="__main__":
             if u in test_users:
                 user_items += test_users[u].keys()
 
-            items_for_cremonesi_validation = testing.choose_some_items(item_ids, user_items, i, 100)            
+            items_for_cremonesi_validation = testing.choose_some_items(item_ids, user_items, i, 40)            
             ratings = recommender.get_ratings(u, items_for_cremonesi_validation)
 
             recommendations = ranker.topRatings(ratings)
@@ -136,7 +136,7 @@ if __name__=="__main__":
             div_metric1.append(ev.simpleDiversity(recommendations, training_items))
             div_metric2.append(ev.diversityEILD(recommendations, training_items))
              
-    test_size = 301.0
+    test_size = 3191.0
     print 'rec', hits/test_size, 'prec', hits/(test_size * N)
     print 'sim simple', sum(div_metric1)/len(div_metric1)
     print 'div vargas', sum(div_metric2)/len(div_metric2)

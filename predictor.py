@@ -59,6 +59,19 @@ class Predictor(object):
                 info[i][j] -= avgs[i]
         return info, avgs
 
+    def choose_some_items(self, item_ids, user_items, target_item, K):
+        '''
+        Selects K items in the dataset (item_ids) randomly, 
+        excluding those that were rated by a certain user (user_items)
+        and appending the target_item
+        '''
+        items = list(set(item_ids) - set(user_items))
+
+        from random import sample
+        movies = sample(items, K)
+        movies.append(target_item)
+        return movies
+
         
 if __name__=="__main__":
     a = Predictor(sys.argv[1], sys.argv[2])

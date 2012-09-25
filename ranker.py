@@ -52,10 +52,24 @@ class Ranker(object):
         #print liked_only_candidate/len(common_ratings)
         return liked_only_candidate/len(common_ratings)
 
+    def __rescale_predictions(self, preds):
+        '''
+        rescale predictions in such a way that they fall into [0; inf)
+        '''
+        minv = min([i[0] for i in preds])
+        #print 'minv', minv
+        if minv >= 0.0: return preds
 
-    def __normalizePredictions(self, predictions):
+        predictions = []
+        for (score, item) in preds:
+            predictions.append((score + (minv * -1.0), item))
+        return predictions
+
+    def __normalizePredictions(self, preds):
+        predictions = self.__rescale_predictions(preds)
+        #print '******', predictions
+
         maxv = -1.0
-
         for (value, item) in predictions:
             if value > maxv: maxv = value
 
